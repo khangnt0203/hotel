@@ -4,7 +4,7 @@ import "antd/dist/antd.css";
 
 import { Form, Input, Button, Checkbox} from "antd";
 import { GoogleOutlined } from "@ant-design/icons";
-import {  postAuth } from "../../Util/httpHelper";
+import {  post } from "../../Util/httpHelper";
 import { useHistory } from "react-router-dom";
 import { setToken, setUser } from "../../Util/Auth";
 
@@ -24,7 +24,7 @@ function Login() {
   const [error, setError] = useState(null);
 
   const handleLogin = (e) => {
-    postAuth("/users/login", {
+    post("/users/login", {
       email:email.value,
       password: password.value
     },

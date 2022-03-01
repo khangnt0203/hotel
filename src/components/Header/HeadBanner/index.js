@@ -5,17 +5,16 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
 import { UserOutlined } from "@ant-design/icons";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import { getUser, removeToken } from "../../../Util/Auth";
 
 import { useHistory } from "react-router-dom";
-import { getAuth } from "../../../Util/httpHelper";
+
 function HeadBanner(props) {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const [hotelName, setHotelName] = React.useState(null);
+
   const history = useHistory();
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);

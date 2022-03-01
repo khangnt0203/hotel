@@ -4,7 +4,7 @@ import "antd/dist/antd.css";
 import "./index.css";
 import Login from "./components/Login";
 
-import { BrowserRouter, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 
 import PrivateRoute from "./Util/PrivateRoute";
 import Manager from "./components/Manager";
@@ -15,7 +15,6 @@ function App() {
     <BrowserRouter>
       <PublicRoute exact path="/" component={Login} />
       <PrivateRoute exact path="/manager" component={Manager} />
-      
     </BrowserRouter>
   );
 }

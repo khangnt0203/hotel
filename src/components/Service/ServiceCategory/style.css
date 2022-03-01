@@ -49,3 +49,7 @@ tr:nth-child(even) {
 thead{
   border-color:black ;
 }
+
+.code-box-demo .ant-alert {
+  margin-bottom: 16px;
+}
