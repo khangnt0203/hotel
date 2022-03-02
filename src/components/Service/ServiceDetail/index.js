@@ -45,7 +45,7 @@ function ServiceTable() {
     getAuth("/service-categories?hotel-id=2").then((response) => {
       let map = new Map();
       if (response.status === 200) {
-        response.data.data.data.map((e) => {
+        response.data.data.map((e) => {
           map.set(e.id, e);
         });
         setCateList([...map.values()]);

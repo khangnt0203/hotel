@@ -36,6 +36,7 @@ export default function Manager() {
           style={{ margin: "24px 16px 0", overflow: "initial" }}
         >
           {showRoute()}
+        
         </Content>
       </Layout>
     </Layout>
