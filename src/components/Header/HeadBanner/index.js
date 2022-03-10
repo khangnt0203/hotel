@@ -61,6 +61,11 @@ function HeadBanner(props) {
           >
             <MenuItem onClick={handleCloseUserMenu}>
               <Typography textAlign="center">
+                <a href="/home">Change hotel</a>
+              </Typography>
+            </MenuItem>
+            <MenuItem onClick={handleCloseUserMenu}>
+              <Typography textAlign="center">
                 <a onClick={handleLogout}>Log out</a>
               </Typography>
             </MenuItem>

@@ -1,12 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "antd/dist/antd.css";
 import { Menu, Layout } from "antd";
 import { BankOutlined, SettingOutlined } from "@ant-design/icons";
+import { getAuth } from "../../Util/httpHelper";
+import { getHotel, setHotel } from "../../Util/Auth";
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
 
+let interval;
+
 function SideBar(props) {
+  const [time, setTime] = useState(new Date().toLocaleTimeString());
+  const [hotel, setHotel] = useState();
+  useEffect(() => {
+    interval = setInterval(
+      () => setTime(new Date().toLocaleTimeString()),
+      1000
+    );
+  });
+
+  useEffect(() => {
+    getHotelDetail();
+  }, []);
+
+  let chosen = getHotel();
+
+  function getHotelDetail() {
+    getAuth(`/hotels/${chosen}`).then((response) => {
+      if (response.status === 200) {
+        setHotel(response.data.data);
+      }
+    });
+  }
   return (
     <Sider
       style={{
@@ -25,14 +51,16 @@ function SideBar(props) {
           style={{
             padding: 20,
             fontStyle: "italic",
-            fontSize: 40,
+            fontSize: 15,
             color: "#33CCFF",
           }}
         >
-          Hotel
+          {hotel ? hotel.name : null}
         </h1>
-
-        <Menu.Item>
+        <h2 style={{ marginTop: 20, marginLeft: 40, fontSize: 15 }}>
+          Time: {time}
+        </h2>
+        <Menu.Item onClick={() => props.onChoice("DASHBOARD")}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             style={{ marginRight: 7, color: "#7B68EE" }}
@@ -71,7 +99,9 @@ function SideBar(props) {
             </svg>
           }
         >
-          <Menu.Item>Booking</Menu.Item>
+          <Menu.Item onClick={() => props.onChoice("BOOKING")}>
+            Booking
+          </Menu.Item>
           <Menu.Item onClick={() => props.onChoice("SERVICE DETAIL")}>
             Guest
           </Menu.Item>
@@ -91,6 +121,7 @@ function SideBar(props) {
           </svg>
           Report
         </Menu.Item>
+
         <SubMenu
           key="sub2"
           icon={<SettingOutlined style={{ color: "#7B68EE" }} />}
@@ -107,12 +138,11 @@ function SideBar(props) {
         <SubMenu
           key="sub3"
           icon={<BankOutlined style={{ color: "#BA55D3" }} />}
-          title="Building"
+          title="Hotel"
         >
           <Menu.Item>Room</Menu.Item>
-          <Menu.Item>Building</Menu.Item>
+          <Menu.Item onClick={() => props.onChoice("BUILDING DETAIL")}>Building</Menu.Item>
         </SubMenu>
-
         <Menu.Item>
           <svg
             xmlns="http://www.w3.org/2000/svg"

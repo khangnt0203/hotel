@@ -1,14 +1,24 @@
 import React, { useEffect } from "react";
-import { Button, Input, Breadcrumb, Layout } from "antd";
+import {
+  Button,
+  Input,
+  Breadcrumb,
+  Layout,
+  Table,
+  Popconfirm,
+  message,
+} from "antd";
 import "antd/dist/antd.css";
 import "../ServiceDetail/style.css";
-import { Table } from "reactstrap";
+
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { getAuth } from "../../../Util/httpHelper";
+import { delAuth, getAuth } from "../../../Util/httpHelper";
+import { getHotel, getToken } from "../../../Util/Auth";
+import { DeleteFilled, EditFilled } from "@ant-design/icons";
 
 const { Content } = Layout;
 const { Search } = Input;
@@ -32,17 +42,30 @@ function ServiceTable() {
   const [serviceList, setServiceList] = React.useState([]);
   const [keyword, setKeyword] = React.useState([]);
   const [keyCate, setKeyCate] = React.useState([]);
+  const [currentPage, setCurrentPage] = React.useState(1);
 
   useEffect(() => {
     getListCate();
+    getListServiceByCate(keyCate)
   }, []);
 
   async function handleInputChange(e) {
     setKeyword(e.target.value);
   }
+  const deleteService = (id) => {
+    delAuth(`/services/${id}`).then((response) => {
+      if (response.status === 200) {
+        message.success("Delete Successfully");
+        getListServiceByCate(keyCate)
+      }
+    });
+   
+
+  };
+  let chosen = getHotel();
 
   function getListCate() {
-    getAuth("/service-categories?hotel-id=2").then((response) => {
+    getAuth(`/service-categories?hotel-id=${chosen}`).then((response) => {
       let map = new Map();
       if (response.status === 200) {
         response.data.data.map((e) => {
@@ -53,14 +76,20 @@ function ServiceTable() {
     });
   }
 
-
-  function getListServiceByCate(e) {
-    setKeyCate(e.target.value)
-    getAuth(`/services?service-category-id=${e.target.value}`).then((response) => {
-      if (response.status === 200) {
-        setServiceList([...response.data.data.data]);
+  async function getListServiceByCate(e) {
+    await setKeyCate(e.target.value);
+    console.log(keyCate);
+    let map = new Map();
+    getAuth(`/services?service-category-id=${keyCate}`).then(
+      (response) => {
+        if (response.status === 200) {
+          response.data.data.data.map((p) => {
+            map.set(p.id, p);
+          });
+          setServiceList([...map.values()]);
+        }
       }
-    });
+    );
   }
 
   function getListServiceBySearch() {
@@ -72,6 +101,74 @@ function ServiceTable() {
       }
     );
   }
+  const column = [
+    {
+      title: "No",
+      key: "nameService",
+      render: (e, item, index) => {
+        return <>{index + 1}</>;
+      },
+    },
+    {
+      title: "Service name",
+      key: "nameService",
+      dataIndex: "nameService",
+    },
+    {
+      title: "Description",
+      key: "nameCatService",
+      dataIndex: "description",
+    },
+    {
+      title: "price",
+      key: "nameCatService",
+      dataIndex: "price",
+    },
+    {
+      title: "Action",
+      render: (e, item) => {
+        return (
+          <>
+            <Button
+              type="primary"
+              style={{
+                borderRadius: 3,
+                marginLeft: 10,
+                height: 45,
+                boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.1)",
+                backgroundColor: "#11cdef",
+                borderColor: "#11cdef",
+              }}
+            >
+              <EditFilled />
+            </Button>
+            <Popconfirm
+              title="Are you sure to delete this Service?"
+              onConfirm={() => {
+                deleteService(item.id);
+              }}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button
+                type="danger"
+                style={{
+                  borderRadius: 3,
+                  height: 45,
+                  marginLeft: 10,
+                  boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.1)",
+                  backgroundColor: "#f5365c",
+                }}
+              >
+                <DeleteFilled />
+              </Button>
+            </Popconfirm>
+            ,
+          </>
+        );
+      },
+    },
+  ];
 
   return (
     <Layout className="site-layout">
@@ -166,7 +263,6 @@ function ServiceTable() {
                   MenuProps={MenuProps}
                   value={keyCate}
                   onChange={getListServiceByCate}
-              
                 >
                   {cateList.map((cate) => (
                     <MenuItem key={cate.id} value={cate.id}>
@@ -175,73 +271,7 @@ function ServiceTable() {
                   ))}
                 </Select>
               </FormControl>
-              <Table>
-                <thead>
-                  <tr>
-                    <th>No</th>
-                    <th>Service Name</th>
-                    <th>Price</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {serviceList.map((service,index) => (
-                    <tr key={service.id}>
-                      <td> {(index+1)}</td>
-                      <td>{service.nameService}</td>
-                      <td>{service.price}</td>
-                      <td>
-                        <Button
-                          type="danger"
-                          style={{
-                            borderRadius: 3,
-                            height: 45,
-                            boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.1)",
-                            backgroundColor: "#f5365c",
-                          }}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            fill="currentColor"
-                            class="bi bi-trash-fill"
-                            viewBox="0 0 16 16"
-                          >
-                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z" />
-                          </svg>
-                        </Button>
-                        <Button
-                          type="primary"
-                          style={{
-                            borderRadius: 3,
-                            marginLeft: 10,
-                            height: 45,
-                            boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.1)",
-                            backgroundColor: "#11cdef",
-                            borderColor: "#11cdef",
-                          }}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            fill="currentColor"
-                            class="bi bi-pencil-square"
-                            viewBox="0 0 16 16"
-                          >
-                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                            <path
-                              fill-rule="evenodd"
-                              d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
-                            />
-                          </svg>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+              <Table columns={column} dataSource={serviceList} />
             </div>
           </div>
         </div>

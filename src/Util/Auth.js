@@ -19,3 +19,17 @@ export const isLogin = () => {
 export const removeToken = () => {
   sessionStorage.removeItem("token");
 };
+
+export const setHotel = (hotel) => {
+  sessionStorage.setItem("hotel", hotel);
+};
+
+export const getHotel = () => {
+  return sessionStorage.getItem("hotel");
+};
+
+export const isChooseHotel = () => {
+  if (getHotel() === null) {
+    return false;
+  } else return true;
+};

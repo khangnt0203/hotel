@@ -9,12 +9,17 @@ import { BrowserRouter } from "react-router-dom";
 import PrivateRoute from "./Util/PrivateRoute";
 import Manager from "./components/Manager";
 import PublicRoute from "./Util/PublicRoute";
+import HomePage from "./components/HomePage";
+import PrivateManagerRoute from "./Util/PrivateManagerRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <PublicRoute exact path="/" component={Login} />
-      <PrivateRoute exact path="/manager" component={Manager} />
+     
+      <PrivateRoute exact path="/home" component={HomePage} />
+
+      <PrivateManagerRoute exact path="/manager" component={Manager} />
     </BrowserRouter>
   );
 }

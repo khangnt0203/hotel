@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import { isLogin } from "./Auth";
+import { isChooseHotel, isLogin } from "./Auth";
 
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
@@ -10,7 +10,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
       {...rest}
       
       render={(props) =>{
-        if(isLogin() === true){
+        if(isLogin() === true ){
           return <Component {...props}/>
         }
         else{

@@ -33,7 +33,7 @@ function Login() {
         if (response.data.statusCode === 200) {
           setToken(response.data.data.token)
           setUser(email.value)
-          history.push('/manager');
+          history.push('/home');
           
         }
       })

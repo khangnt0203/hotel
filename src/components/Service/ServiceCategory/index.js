@@ -18,6 +18,8 @@ import {
   DeleteFilled,
   EditFilled,
 } from "@ant-design/icons";
+import { getHotel } from "../../../Util/Auth";
+
 const { Content } = Layout;
 const { Search } = Input;
 
@@ -36,7 +38,7 @@ function ServiceCategoryTable() {
   const showModal = () => {
     setIsModalVisible(true);
   };
-
+let chosen = getHotel();
   const handleOk = () => {
     setIsModalVisible(false);
   };
@@ -54,7 +56,7 @@ function ServiceCategoryTable() {
     console.log(selectedCategory);
     setIsModalUpdateVisible(true);
   };
-
+  
   useEffect(() => {
     getListCate(currentPage);
   }, []);
@@ -68,10 +70,10 @@ function ServiceCategoryTable() {
       });
     }
   }, [selectedCategory]);
-
+  //load data
   async function getListCate(page) {
     console.log("Current: ", page);
-    getAuth(`/service-categories?hotel-id=2&page-index=${page}`).then(
+    getAuth(`/service-categories?hotel-id=${chosen}&page-index=${page}`).then(
       (response) => {
         let map = new Map();
         if (response.status === 200) {
@@ -84,9 +86,9 @@ function ServiceCategoryTable() {
       }
     );
   }
-
+  //search
   function getCateListBySearch() {
-    getAuth(`/service-categories?name=${keyword}&hotel-id=2`).then(
+    getAuth(`/service-categories?name=${keyword}&hotel-id=${chosen}`).then(
       (response) => {
         let map = new Map();
         if (response.status === 200) {
@@ -99,13 +101,12 @@ function ServiceCategoryTable() {
     );
   }
 
-  function getCateByID() {}
-
+  //add category
   const addCategory = () => {
     postAuth(`/service-categories`, {
       nameCatService: nameCategory,
       description: description,
-      hotelId: 2,
+      hotelId: chosen,
     }).then((response) => {
       if (response.status === 201) {
         message.success("Input Successfully");
@@ -115,15 +116,14 @@ function ServiceCategoryTable() {
       }
     });
   };
-
-  const editCategory = () => {
-    console.log('ID: ', idCategory)
+  //edit category
+  const editCategory = (values) => {
     putAuth(`/service-categories`, {
       id: idCategory,
-      nameCatService: nameCategory,
-      description: description,
-      hotelId: 2,
-      status: true
+      nameCatService: values.nameCategory,
+      description: values.description,
+      hotelId: chosen,
+      status: true,
     }).then((response) => {
       if (response.status === 200) {
         message.success("Update Successfully");
@@ -132,11 +132,10 @@ function ServiceCategoryTable() {
       }
     });
   };
-
+  //delete category
   const deleteCategory = (id) => {
     console.log(id);
-    delAuth(`/service-categories/${id}`)
-    .then((response) => {
+    delAuth(`/service-categories/${id}`).then((response) => {
       if (response.status === 200) {
         message.success("Delete Successfully");
         getListCate(currentPage);
@@ -148,7 +147,7 @@ function ServiceCategoryTable() {
       title: "No",
       key: "nameCatService",
       render: (e, item, index) => {
-        return <>{index+1}</>;
+        return <>{index + 1}</>;
       },
     },
     {
@@ -177,11 +176,9 @@ function ServiceCategoryTable() {
                 borderColor: "#11cdef",
               }}
               onClick={() => {
-                setIdCategory(item.id)
+                setIdCategory(item.id);
                 setSelectedCategory(item);
                 setIsModalUpdateVisible(true);
-                
-              
               }}
             >
               <EditFilled />
@@ -315,7 +312,6 @@ function ServiceCategoryTable() {
             </Button>
           </Form.Item>
         </Form>
-
       </Modal>
       <>
         <Modal
@@ -341,6 +337,7 @@ function ServiceCategoryTable() {
                 span: 40,
               }}
               autoComplete="off"
+              onFinish={editCategory}
             >
               <div>Name Category</div>
               <Form.Item
@@ -418,7 +415,6 @@ function ServiceCategoryTable() {
                     boxShadow:
                       "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
                   }}
-                  onClick={editCategory}
                 >
                   Save
                 </Button>

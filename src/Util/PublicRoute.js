@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import { isLogin } from "./Auth";
+import {isLogin } from "./Auth";
 
 
 const PublicRoute = ({ component: Component, ...rest }) => {
@@ -14,7 +14,7 @@ const PublicRoute = ({ component: Component, ...rest }) => {
           return <Component {...props}/>
         }
         else{
-          return <Redirect to={'/manager'}/>
+          return <Redirect to={'/home'}/>
         }
       }
       }

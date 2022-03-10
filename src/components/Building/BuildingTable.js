@@ -1,221 +1,310 @@
-import React from "react";
-import { Button, Table, Input } from "antd";
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  Input,
+  Breadcrumb,
+  Layout,
+  Modal,
+  Form,
+  message,
+  Table,
+  Popconfirm,
+  Drawer,
+} from "antd";
 import "antd/dist/antd.css";
-
+import {
+  PlusSquareOutlined,
+  DeleteFilled,
+  EditFilled,
+} from "@ant-design/icons";
+import { delAuth, getAuth, postAuth } from "../../Util/httpHelper";
+import { getHotel } from "../../Util/Auth";
+const { Content } = Layout;
 const { Search } = Input;
 
-const columns = [
-  {
-    title: "No",
-    dataIndex: "No",
-  },
-  {
-    title: "Building Name",
-    dataIndex: "BuildingName",
-    sorter: {
-      compare: (a, b) => a.BuildingName - b.BuildingName,
-      multiple: 3,
-    },
-  },
-  {
-    title: "Total Floor",
-    dataIndex: "Floor",
-    sorter: {
-      compare: (a, b) => a.Floor - b.Floor,
-      multiple: 2,
-    },
-  },
-  {
-    title: "Total Room",
-    dataIndex: "Room",
-    sorter: {
-      compare: (a, b) => a.english - b.english,
-      multiple: 1,
-    },
-  },
-  {
-    title: "Status",
-    dataIndex: "Status",
-    sorter: {
-      compare: (a, b) => a.english - b.english,
-      multiple: 1,
-    },
-  },
-  {
-    title: "Action",
-    render: () => (
-      <>
-        <Button
-          type="danger"
-          style={{
-            borderRadius: 3,
-            height: 45,
-            boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.1)",
-            backgroundColor: "#f5365c",
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-trash-fill"
-            viewBox="0 0 16 16"
-          >
-            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z" />
-          </svg>
-        </Button>
-        <Button
-          type="primary"
-          style={{
-            borderRadius: 3,
-            marginLeft: 10,
-            height: 45,
-            boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.1)",
-            backgroundColor: "#11cdef",
-            borderColor: "#11cdef",
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-pencil-square"
-            viewBox="0 0 16 16"
-          >
-            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-            <path
-              fill-rule="evenodd"
-              d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
-            />
-          </svg>
-        </Button>
-      </>
-    ),
-  },
-];
-
-const data = [
-  {
-    No: "1",
-    BuildingName: "Building A",
-    Floor: 95,
-    Room: 60,
-    Status: 40,
-  },
-  {
-    No: "1",
-    BuildingName: "Building B",
-    Floor: 98,
-    Room: 60,
-    Status: 70,
-  },
-  {
-    No: "1",
-    BuildingName: "Building B",
-    Floor: 98,
-    Room: 60,
-    Status: 70,
-  },
-  {
-    No: "1",
-    BuildingName: "Building A",
-    Floor: 98,
-    Room: 60,
-    Status: 70,
-  },
-  {
-    No: "1",
-    BuildingName: "Building A",
-    Floor: 98,
-    Room: 60,
-    Status: 70,
-  },
-  {
-    No: "1",
-    BuildingName: "Building A",
-    Floor: 98,
-    Room: 60,
-    Status: 70,
-  },
-  {
-    No: "1",
-    BuildingName: "Building A",
-    Floor: 98,
-    Room: 60,
-    Status: 70,
-  },
-  {
-    No: "1",
-    BuildingName: "Building A",
-    Floor: 98,
-    Room: 60,
-    Status: 70,
-  },
-  {
-    No: "1",
-    BuildingName: "Building A",
-    Floor: 98,
-    RoomN: 0,
-    Status: 70,
-  },
-];
-
-function onChange(pagination, filters, sorter, extra) {
-  console.log("params", pagination, filters, sorter, extra);
-}
 function BuildingTable() {
+  const [buildingList, setBuildingList] = useState([]);
+  const [keyword, setKeyword] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalUpdateVisible, setIsModalUpdateVisible] = useState(false);
+  const [idBuilding, setIdBuilding] = useState("");
+  const [nameBuilding, setNameBuilding] = useState("");
+  const [floorNo, setFloorNo] = useState("");
+  const [totalRoom, setTotalRoom] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState();
+  const [selectedBuilding, setSelectedBuilding] = useState();
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    setIsModalUpdateVisible(false);
+  };
+
+  function handleInputChange(e) {
+    setKeyword(e.target.value);
+  }
+
+  const showModalUpdate = () => {
+    console.log(selectedCategory);
+    setIsModalUpdateVisible(true);
+  };
+
+  useEffect(() => {
+    getListBuilding(currentPage);
+  }, []);
+
+  // update form update when selectedCAtegory change
+let chosen = getHotel();
+  async function getListBuilding(page) {
+    console.log("Current: ", page);
+    getAuth(`/buildings?hotel-id=${chosen}&page-index=${page}`).then((response) => {
+      let map = new Map();
+      if (response.status === 200) {
+        response.data.data.map((e) => {
+          map.set(e.id, e);
+        });
+        console.log('1:',map);
+        setBuildingList([...map.values()]);
+      }
+    });
+  }
+  const deleteBuilding = (id) => {
+    delAuth(`/buildings/${id}`).then((response) => {
+      if (response.status === 200) {
+        message.success("Delete Successfully");
+        getListBuilding(currentPage);
+      }
+    });
+  };
+  // const addBuilding = () => {
+  //   postAuth(`/buildings`, {
+  //     nameCatService: nameCategory,
+  //     description: description,
+  //     hotelId: 2,
+  //   }).then((response) => {
+  //     if (response.status === 201) {
+  //       message.success("Input Successfully");
+  //       setIsModalVisible(false);
+  //       getListCate(currentPage);
+  //       formAdd.resetFields();
+  //     }
+  //   });
+  // };
+  useEffect(() => {
+    getBuilding();
+  }, []);
+  function getBuilding() {
+    getAuth(`/buildings?hotel-id=${chosen}`).then((response) => {
+      if (response.status === 200) {
+        let map = new Map();
+        response.data.data.map((e) => {
+          map.set(e.id, e);
+        });
+        setBuildingList([...map.values()]);
+      }
+    });
+  }
+
+  function getListBuildingBySearch() {
+    getAuth(`/buildings?building-name=${keyword}&hotel-id=2`).then(
+      (response) => {
+        if (response.status === 200) {
+          setBuildingList([...response.data.data]);
+        }
+      }
+    );
+  }
+
+  const column = [
+    {
+      title: "No",
+      key: "id",
+      render: (e, item, index) => {
+        return <>{index + 1}</>;
+      },
+    },
+    {
+      title: "Building name",
+      key: "id",
+      dataIndex: "buildingName",
+     
+    },
+    {
+      title: "Floor No",
+      key: "id",
+      dataIndex: "floorNo",
+    },
+    {
+      title: "Total Room",
+      key: "id",
+      dataIndex: "totalRoom",
+    },
+
+    {
+      title: "Action",
+      render: (e, item) => {
+        return (
+          <>
+            <Button
+              onClick={() => {
+                setSelectedBuilding(e);
+                showDrawer();
+              }}
+              type="primary"
+              style={{
+                borderRadius: 3,
+                marginLeft: 10,
+                height: 45,
+                boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.1)",
+                backgroundColor: "#11cdef",
+                borderColor: "#11cdef",
+              }}
+            >
+              <EditFilled />
+            </Button>
+            <Popconfirm
+              title="Are you sure to delete this Category?"
+              onConfirm={() => {
+                deleteBuilding(item.id);
+              }}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button
+                type="danger"
+                style={{
+                  borderRadius: 3,
+                  height: 45,
+                  marginLeft: 10,
+                  boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.1)",
+                  backgroundColor: "#f5365c",
+                }}
+              >
+                <DeleteFilled />
+              </Button>
+            </Popconfirm>
+            ,
+          </>
+        );
+      },
+    },
+  ];
+  const [visible, setVisible] = useState(false);
+
+  const showDrawer = () => {
+    setVisible(true);
+  };
+
+  const onClose = () => {
+    setVisible(false);
+  };
+
   return (
     <div>
-      <div style={{}}>
-        <div
+      <Drawer
+        title="Basic Drawer"
+        placement="right"
+        onClose={onClose}
+        visible={visible}
+      >
+        {selectedBuilding ? <p>{selectedBuilding.buildingName}</p> : <a>Lỗi</a>}
+      </Drawer>
+      <Layout className="site-layout">
+        <Content
           style={{
-            padding: 10,
-            fontStyle: "inherit",
-            fontSize: 50,
-            fontWeight: 600,
-            lineHeight: 1.5,
-            color: "#32325d",
+            margin: "0 16px",
+            boxShadow: "1px 1px 3px rgba(0, 0, 0, 0.1)",
+            borderRadius: 10,
           }}
         >
-          Building Management
-        </div>
-        <Button
-          style={{
-            borderColor: "#f7fafc",
-            marginBottom: 30,
-            marginLeft: "80%",
-            height: 45,
-            width: 150,
-            borderRadius: 6,
-            backgroundColor: "#f7fafc",
-            boxShadow:
-              "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
-          }}
-          href="/addService"
-        >
-          Add building
-        </Button>
-        <hr color="#F2F2F2" />
-        <br />
+          <Breadcrumb
+            style={{
+              fontWeight: 600,
+              fontStyle: "inherit",
+              color: "white",
+              fontSize: 17,
+              marginLeft: 70,
+              top: -220,
+              position: "relative",
+            }}
+          >
+            <Breadcrumb.Item style={{ fontSize: 22 }}>
+              Building Management
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Building</Breadcrumb.Item>
+          </Breadcrumb>
 
-        <Search
-          placeholder="Name"
-          onSearch={""}
-          enterButton
-          size="large"
-          style={{
-            width: "30%",
-            marginRight: "77%",
-            marginBottom: 40,
-            borderRadius: 5,
-            marginLeft: 80,
-          }}
-        />
+          <div
+            className="site-layout-background"
+            style={{
+              padding: 24,
+              marginTop: -200,
+              borderRadius: 6,
+              marginLeft: 50,
+            }}
+          >
+            <div>
+              <div style={{}}>
+                <div
+                  style={{
+                    padding: 10,
+                    fontStyle: "inherit",
+                    fontSize: 50,
+                    fontWeight: 600,
+                    lineHeight: 1.5,
+                    color: "#32325d",
+                  }}
+                >
+                  Building Management
+                </div>
+                <Button
+                  style={{
+                    borderColor: "#f7fafc",
+                    marginBottom: 30,
+                    marginLeft: "80%",
+                    height: 45,
+                    width: 150,
+                    borderRadius: 6,
+                    backgroundColor: "#f7fafc",
+                    boxShadow:
+                      "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
+                  }}
+                >
+                  <PlusSquareOutlined />
+                  New Category
+                </Button>
+                <hr color="#F2F2F2" />
+                <br />
+                <Search
+                  placeholder="Input search key..."
+                  onSearch={getListBuildingBySearch}
+                  value={keyword}
+                  name={keyword}
+                  onChange={handleInputChange}
+                  enterButton
+                  size="large"
+                  style={{
+                    width: "30%",
+                    marginRight: "77%",
+                    marginBottom: 40,
+                    marginLeft: 10,
+                  }}
+                />
 
-        <Table columns={columns} dataSource={data} onChange={onChange}></Table>
-      </div>
+                <Table columns={column} dataSource={buildingList} />
+                <br />
+              </div>
+            </div>
+          </div>
+        </Content>
+      </Layout>
     </div>
   );
 }
