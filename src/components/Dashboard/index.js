@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedHotel, setSelectedHotel] = useState();
   const [hotel, setHotel] = useState();
+  const [report, setReport] = useState();
   const handleShow = () => {
     setIsVisible(true);
   };
@@ -28,6 +29,7 @@ export default function Dashboard() {
   };
   useEffect(() => {
     getHotelDetail();
+    getReport();
   }, []);
 
   let chosen = getHotel();
@@ -39,6 +41,20 @@ export default function Dashboard() {
       }
     });
   }
+
+  function toTimestamp(){return Date.now()/1000;}
+
+  function getReport() {
+    console.log(`/reports/${chosen}/?date-pick=${toTimestamp().toFixed(0)}`);
+    
+    getAuth(`/reports/${chosen}/?date-pick=${toTimestamp().toFixed(0)}`).then((response) => {
+      if (response.status === 200) {
+        setReport(response.data.data);
+        console.log(report);
+      }
+    });
+  }
+
   return (
     <div>
       <Layout className="site-layout">
@@ -63,34 +79,59 @@ export default function Dashboard() {
                 {/* hotel activity */}
                 <Col span={8}>
                   {/* image */}
-                 {hotel? <Card bordered={false}>
+                 {/* {hotel? <Card bordered={false}>
                     <img
                       style={{ witdh: 200, height: 200 }}
                       src='https://pearlriverhotel.vn/wp-content/uploads/2019/07/pearl-river-hotel-home1.jpg'
                       alt='Image is not available'
                     />
-                  </Card>:null}
+                  </Card>:null} */}
                   {/* booking info */}
                   <Card bordered={false}>
-                    Booking
+                    Booking State
                     <Row gutter={16}>
                       <Col span={12}>
                         <Card>
                           <Statistic
-                            title="Success"
-                            value={11.28}
-                            precision={2}
-                            valueStyle={{ color: "#3f8600" }}
+                            title="New"
+                            value={report ? report.newOrder : 0}
+                            precision={0}
+                            valueStyle={{ color: "#345beb" }}
                           />
                         </Card>
                       </Col>
                       <Col span={12}>
                         <Card>
                           <Statistic
-                            title="Fail"
-                            value={9.3}
-                            precision={2}
-                            valueStyle={{ color: "#cf1322" }}
+                            title="Check In"
+                            value={report ? report.checkInOrder : 0}
+                            precision={0}
+                            valueStyle={{ color: "#ebba34" }}
+                          />
+                        </Card>
+                      </Col>
+                    </Row>
+                  </Card>
+                  <Card bordered={false}>
+                    {/* Booking */}
+                    <Row gutter={16}>
+                      <Col span={12}>
+                        <Card>
+                          <Statistic
+                            title="Staying"
+                            value={report ? report.stayInOrder : 0}
+                            precision={0}
+                            valueStyle={{ color: "#2cd15d" }}
+                          />
+                        </Card>
+                      </Col>
+                      <Col span={12}>
+                        <Card>
+                          <Statistic
+                            title="Check Out"
+                            value={report ? report.checkOutOrder : 0}
+                            precision={0}
+                            valueStyle={{ color: "#d13f2c" }}
                           />
                         </Card>
                       </Col>
@@ -98,27 +139,34 @@ export default function Dashboard() {
                   </Card>
                   {/* revenue info */}
                   <Card bordered={false}>
-                    Revenue
                     <Row gutter={16}>
                       <Col span={12}>
-                        <Statistic title="Active Users" value={112893} />
+                        <Card>
+                          <Statistic
+                            title="Cancel"
+                            value={report ? report.cancelOrder : 0}
+                            precision={0}
+                            valueStyle={{ color: "#8f8e8d" }}
+                          />
+                        </Card>
                       </Col>
                       <Col span={12}>
-                        <Statistic
-                          title="Account Balance (CNY)"
-                          value={112893}
-                          precision={2}
-                        />
-                        <Button style={{ marginTop: 16 }} type="primary">
-                          Recharge
-                        </Button>
+                        <Card>
+                          <Statistic
+                            title="Revenue"
+                            value={report ? report.revenue : 0}
+                            precision={0}
+                            valueStyle={{ color: "#dc5ce6" }}
+                          />
+                        </Card>
                       </Col>
                     </Row>
                   </Card>
                 </Col>
                 {/* hotel info */}
-                {hotel ? (
-                  <Col span={15}>
+                
+                <Col span={15}>
+                  {hotel ? (
                     <Card bordered={false}>
                       <Descriptions title="Hotel Info" bordered>
                         <Descriptions.Item label="Name" span={3}>
@@ -139,8 +187,43 @@ export default function Dashboard() {
                         </Descriptions.Item>
                       </Descriptions>
                     </Card>
-                  </Col>
-                ) : null}
+                  ) : null}
+                  <Card bordered={false}>
+                    Room State
+                    <Row gutter={16}>
+                      <Col span={8}>
+                        <Card>
+                          <Statistic
+                            title="Vacancies"
+                            value={report ? report.vacancies : 0}
+                            precision={0}
+                            valueStyle={{ color: "#2cd15d" }}
+                          />
+                        </Card>
+                      </Col>
+                      <Col span={8}>
+                        <Card>
+                          <Statistic
+                            title="Fullness"
+                            value={report ? report.fullness : 0}
+                            precision={0}
+                            valueStyle={{ color: "#5ce6e3" }}
+                          />
+                        </Card>
+                      </Col>
+                      <Col span={8}>
+                        <Card>
+                          <Statistic
+                            title="Departure"
+                            value={report ? report.departure : 0}
+                            precision={0}
+                            valueStyle={{ color: "#cf1322" }}
+                          />
+                        </Card>
+                      </Col>
+                    </Row>
+                  </Card>
+                </Col>
               </Row>
             </div>
           </div>

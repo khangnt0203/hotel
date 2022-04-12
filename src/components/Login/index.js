@@ -4,9 +4,11 @@ import "antd/dist/antd.css";
 
 import { Form, Input, Button, Checkbox} from "antd";
 import { GoogleOutlined } from "@ant-design/icons";
-import {  post } from "../../Util/httpHelper";
+import { post } from "../../Util/httpHelper";
 import { useHistory } from "react-router-dom";
-import { setToken, setUser } from "../../Util/Auth";
+import { setToken, setUser, setUserJWT } from "../../Util/Auth";
+import jwtDecode from "jwt-decode";
+import {User} from "./user.js";
 
 function Login() {
   const history = useHistory();
@@ -32,9 +34,17 @@ function Login() {
       .then((response) => {
         if (response.data.statusCode === 200) {
           setToken(response.data.data.token)
+
+          //decode JWT Token
+          var token = jwtDecode(response.data.data.token)
+
+          //parse and set user to session storage
+          let userJWT = new User(token.id, token.email, token.name, token.role, token.exp)
+          setUserJWT(userJWT)
+
           setUser(email.value)
           history.push('/home');
-          
+
         }
       })
       .catch((error) => {
@@ -52,53 +62,33 @@ function Login() {
         paddingBottom: 50,
       }}
     >
-     
-      
+
+
       <div
         style={{
           backgroundColor: "white",
           borderRadius: 5,
-          height: 600,
-          width: 500,
-          marginLeft: "37%",
+          height: 500,
+          width: 450,
+          marginLeft: "35%",
           boxShadow:
             "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
         }}
       >
-        <div style={{ marginLeft: "37%", fontSize: 20, paddingTop: 30 }}>
-          Sign up with
-        </div>
-        <Button
-          type="primary"
-          htmlType="submit"
-          style={{
-            borderColor: "#DC143C",
 
-            height: 50,
-            width: 140,
-            borderRadius: 6,
-            backgroundColor: "#DC143C",
-            boxShadow:
-              "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
-            marginLeft: 170,
-            marginTop: 30,
-          }}
-        >
-          <GoogleOutlined style={{ fontSize: 20 }} /> Google
-        </Button>
-        <hr style={{ marginTop: 20 }} color="#F2F2F2" />
+         <hr style={{ marginTop: 20 ,textAlign:"center"}} color="#F2F2F2" />
         <div
           className="site-layout-background"
           style={{
-            padding: 24,
+            padding: 20,
 
             borderRadius: 6,
-            marginLeft: 50,
+            marginLeft: 30,
           }}
         >
           <Form
             name="basic"
-            style={{ marginTop: 70 }}
+            style={{ marginTop: 30 }}
             labelCol={{
               span: 8,
             }}
@@ -112,17 +102,25 @@ function Login() {
             onFinishFailed={onFinishFailed}
             autoComplete="off"
           >
-            <div style={{ marginLeft: "15%", marginBottom: 50, fontSize: 20 }}>
-              {" "}
-              Or sign in with credentials
-            </div>
+              <div
+                  style={{
+                      padding: 12,
+                      fontStyle: "inherit",
+                      fontSize: 50,
+                      fontWeight: 600,
+                      lineHeight: 1.5,
+                      color: "#32325d",
+                  }}
+              >
+                  Login
+              </div>
             {error && (
               <>
                 <small style={{ color: "red" }}>{error}</small>
                 <br />
               </>
             )}
-
+              <br />
             <Form.Item
               name="username"
               rules={[
@@ -166,7 +164,7 @@ function Login() {
                     "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
                   borderRadius: 6,
                 }}
-                
+
               />
             </Form.Item>
 
@@ -199,6 +197,7 @@ function Login() {
                   backgroundColor: "#11cdef",
                   boxShadow:
                     "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
+
                 }}
                 onClick={handleLogin}
               >

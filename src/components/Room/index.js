@@ -11,19 +11,22 @@ import {
   Table,
   Popconfirm,
   InputNumber,
+  Space,
 } from "antd";
 import "antd/dist/antd.css";
-import "../ServiceDetail/style.css";
+import "../Floor/style.css";
 
 import FormControl from "@mui/material/FormControl";
 
-import { delAuth, getAuth, postAuth, putAuth } from "../../../Util/httpHelper";
-import { getHotel, getToken } from "../../../Util/Auth";
 import {
   DeleteFilled,
   EditFilled,
+  MinusCircleOutlined,
+  PlusOutlined,
   PlusSquareOutlined,
 } from "@ant-design/icons";
+import { putAuth, getAuth, postAuth } from "../../Util/httpHelper";
+import { getBuilding, getHotel } from "../../Util/Auth";
 
 const { Content } = Layout;
 const { Search } = Input;
@@ -42,7 +45,7 @@ const MenuProps = {
 function onChange(pagination, filters, sorter, extra) {
   console.log("params", pagination, filters, sorter, extra);
 }
-function ServiceTable() {
+function Room() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalUpdateVisible, setIsModalUpdateVisible] = useState(false);
   const [cateList, setCateList] = useState([]);
@@ -51,14 +54,24 @@ function ServiceTable() {
   const [keyCate, setKeyCate] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [serviceName, setServiceName] = useState();
-  const [description, setDescription] = useState();
+  const [buildingList, setBuildingList] = useState();
   const [price, setPrice] = useState();
-  const [cate, setCate] = useState();
-  const [serviceID, setServiceID] = useState();
-  const [selectedService, setSelectedService] = useState();
+  const [building, setBuilding] = useState();
+  const [floor, setFloor] = useState();
+  const [floorNo, setFloorNo] = useState();
+  const [totalRoom, setTotalRoom] = useState();
+  const [roomNo, setRoomNo] = useState();
+  const [maxCapacity, setMaxCapacity] = useState();
+  const [roomTypeList, setRoomTypeList] = useState();
   const [formAdd] = Form.useForm();
+  const [floorList, setFloorList] = useState();
+  const [roomList, setRoomList] = useState();
+  const [keyBuilding, setKeyBuilding] = useState();
+  const [keyFloor, setKeyFloor] = useState();
+  const [roomType, setRoomType] = useState();
+  const [selectedRoom, setSelectedRoom] = useState();
+  const [roomId, setRoomId] = useState();
   const [formUpdate] = Form.useForm();
-
   const showModal = () => {
     setIsModalVisible(true);
   };
@@ -75,93 +88,99 @@ function ServiceTable() {
   function handleInputChange(e) {
     setKeyword(e.target.value);
   }
+
   useEffect(() => {
-    getListCate();
-    getListServiceByCate(keyCate);
+    getFloorList();
+    getRoomByFloor(keyFloor);
+    getBuildingList();
+    getFloorByBuilding(keyBuilding);
+    getRoomType();
   }, []);
-  useEffect(() => {
-    if (selectedService) {
-      formUpdate.setFieldsValue({
-        nameService: selectedService.nameService,
-        description: selectedService.description,
-        price: selectedService.price,
-        serviceCategoryId: selectedService.serviceCategoryId
-      });
-    }
-  }, [selectedService]);
-  async function handleInputChange(e) {
-    setKeyword(e.target.value);
-  }
-  //delete
-  const deleteService = (id) => {
-    delAuth(`/services/${id}`).then((response) => {
-      if (response.status === 200) {
-        message.success("Delete Successfully");
-        getListServiceByCate(cate);
-      }
-    });
-  };
+
   let chosen = getHotel();
 
-  function getListCate() {
-    getAuth(`/service-categories?hotel-id=${chosen}`).then((response) => {
-      let map = new Map();
-      if (response.status === 200) {
-        response.data.data.map((e) => {
-          map.set(e.id, e);
-        });
-        setCateList([...map.values()]);
-      }
-    });
-  }
-
-  async function getListServiceByCate(e) {
+  async function getRoomByFloor(e) {
+    console.log(roomList);
     let map = new Map();
-    getAuth(`/services?service-category-id=${e}`).then((response) => {
+    getAuth(`/rooms?floor-id=${e}`).then((response) => {
       if (response.status === 200) {
         response.data.data.data.map((p) => {
           map.set(p.id, p);
         });
-        setServiceList([...map.values()]);
+        setRoomList([...map.values()]);
       }
     });
   }
 
-  async function loadCate(e) {
-    await setCate(e);
-    console.log(cate);
+  async function loadFloor(e) {
+    await setFloor(e);
+    console.log("floor:", floor);
   }
-  function getListServiceBySearch() {
-    getAuth(`/services?name=${keyword}&service-category-id=${keyCate}`).then(
-      (response) => {
-        if (response.status === 200) {
-          setServiceList([...response.data.data.data]);
-        }
+  async function loadBuilding(e) {
+    await setBuilding(e);
+  }
+  async function loadRoomType(e) {
+    await setRoomType(e);
+    console.log("room type:", roomType);
+  }
+
+  async function getFloorByBuilding(e) {
+    console.log("id:", e);
+    let map = new Map();
+    getAuth(`/floors?building-id=${e}`).then((response) => {
+      if (response.status === 200) {
+        response.data.data.map((p) => {
+          map.set(p.id, p);
+        });
+        setFloorList([...map.values()]);
       }
-    );
+    });
+  }
+
+  function getBuildingList() {
+    let map = new Map();
+    getAuth(`/buildings?hotel-id=${chosen}`).then((response) => {
+      if (response.status === 200) {
+        response.data.data.map((e) => {
+          map.set(e.id, e);
+        });
+        setBuildingList([...map.values()]);
+      }
+    });
+  }
+  function getFloorList() {
+    let map = new Map();
+    getAuth(`/floors?building-id=${building}`).then((response) => {
+      if (response.status === 200) {
+        response.data.data.map((e) => {
+          map.set(e.id, e);
+        });
+        setFloorList([...map.values()]);
+      }
+    });
+  }
+
+  function getRoomType() {
+    let map = new Map();
+    getAuth(`/room-types?hotel-id=${chosen}`).then((response) => {
+      if (response.status === 200) {
+        response.data.data.data.map((e) => {
+          map.set(e.id, e);
+        });
+        setRoomTypeList([...map.values()]);
+      }
+    });
   }
   const column = [
     {
-      title: "No",
-      key: "nameService",
-      render: (e, item, index) => {
-        return <>{index + 1}</>;
-      },
+      title: "Room No",
+      key: "roomNo",
+      dataIndex: "roomNo",
     },
     {
-      title: "Service name",
-      key: "nameService",
-      dataIndex: "nameService",
-    },
-    {
-      title: "Description",
-      key: "nameCatService",
-      dataIndex: "description",
-    },
-    {
-      title: "price",
-      key: "nameCatService",
-      dataIndex: "price",
+      title: "Max Capacity",
+      key: "roomNo",
+      dataIndex: "maxCapacity",
     },
     {
       title: "Action",
@@ -179,18 +198,15 @@ function ServiceTable() {
                 borderColor: "#11cdef",
               }}
               onClick={() => {
-                setServiceID(item.id);
-                setSelectedService(item);
+                setRoomId(item.id);
+                setSelectedRoom(item);
                 setIsModalUpdateVisible(true);
               }}
             >
               <EditFilled />
             </Button>
             <Popconfirm
-              title="Are you sure to delete this Service?"
-              onConfirm={() => {
-                deleteService(item.id);
-              }}
+              title="Are you sure to delete this Room?"
               okText="Yes"
               cancelText="No"
             >
@@ -213,46 +229,56 @@ function ServiceTable() {
       },
     },
   ];
-  //add service
-  const addService = () => {
-    console.log("service name:", serviceName);
-    console.log("price:", price);
-    console.log("cate:", cate);
-    postAuth(`/services`, {
-      nameService: serviceName,
-      price: price,
-      serviceCategoryId: cate,
-      description: description,
+  // add service
+  const addRoom = () => {
+    console.log("room no:", roomNo);
+    console.log("max capacity:", maxCapacity);
+    console.log("floor:", floor);
+    console.log("roomtype:", roomType);
+    postAuth(`/rooms`, {
+      roomNo: roomNo,
+      maxCapacity: maxCapacity,
+      floorId: floor,
+      roomTypeId: roomType,
     }).then((response) => {
-      if (response.status === 201) {
+      if (response.status === 200) {
         message.success("Input Successfully");
         setIsModalVisible(false);
-        getListServiceByCate(cate);
+        getRoomByFloor(floor);
         formAdd.resetFields();
       }
     });
   };
-  //edit category
-  const editService = (values) => {
-    putAuth(`/services`, {
-      id: serviceID,
-      nameService: values.nameService,
-      description: values.description,
-      price: values.price,
-      serviceCategoryId: values.serviceCategoryId,
-      status: true
-    }).then((response) => {
-      if (response.status === 200) {
-        message.success("Update Successfully");
-        setIsModalUpdateVisible(false);
-        getListServiceByCate(cate);
-      }
-    });
-  };
+useEffect(()=>{
+  if(selectedRoom){
+    formUpdate.setFieldsValue({
+      roomNo: selectedRoom.roomNo,
+      maxCapacity: selectedRoom.maxCapacity,
+      floorId: selectedRoom.floor,
+      roomTypeId: selectedRoom.roomType
+    })
+  }
+},[selectedRoom])
+const editRoom = (values) => {
+  putAuth(`/rooms`, {
+    id: roomId,
+    roomNo: values.roomNo,
+    floorId: floor,
+    maxCapacity: values.maxCapacity,
+    roomTypeId: roomType,
+    status: true
+  }).then((response) => {
+    if (response.status === 200) {
+      message.success("Update Successfully");
+      setIsModalUpdateVisible(false);
+      getRoomByFloor(floor);
+    }
+  });
+};
   return (
     <div>
       <Modal
-        title="Service Category Form"
+        title="Room Form"
         visible={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -269,9 +295,34 @@ function ServiceTable() {
           }}
           autoComplete="off"
         >
-          <div>Name Service</div>
+          <Form.Item label="Building">
+            <FormControl sx={{ width: 300 }}>
+              <Select
+                placeholder="Select Building..."
+                onChange={getFloorByBuilding}
+              >
+                {buildingList?.map((e) => (
+                  <Option key={e.id} value={e.id}>
+                    {e.buildingName}
+                  </Option>
+                ))}
+              </Select>
+            </FormControl>
+          </Form.Item>
+          <Form.Item label="Floor">
+            <FormControl sx={{ width: 300 }}>
+              <Select placeholder="Select Floor..." onChange={loadFloor}>
+                {floorList?.map((e) => (
+                  <Option key={e.id} value={e.id}>
+                    {e.floorNo}
+                  </Option>
+                ))}
+              </Select>
+            </FormControl>
+          </Form.Item>
+          <div>Room No </div>
           <Form.Item
-            name="nameService"
+            name="roomNo"
             rules={[
               {
                 required: true,
@@ -280,19 +331,19 @@ function ServiceTable() {
             ]}
           >
             <Input
-              placeholder="Name Service"
-              name="nameService"
+              placeholder="Room No"
+              name="roomNo"
               style={{
                 height: 50,
 
                 borderRadius: 6,
               }}
-              onChange={(e) => setServiceName(e.target.value)}
+              onChange={(e) => setRoomNo(e.target.value)}
             />
           </Form.Item>
-          <div>Price</div>
+          <div>Max Capacity</div>
           <Form.Item
-            name="Price"
+            name="maxCapacity"
             rules={[
               {
                 required: true,
@@ -302,43 +353,22 @@ function ServiceTable() {
           >
             <Input
               type="number"
-              placeholder="Price"
-              name="price"
+              placeholder="Max Capacity"
+              name="maxCapacity"
               style={{
                 height: 50,
                 width: "100%",
                 borderRadius: 6,
               }}
-              onChange={(e) => setPrice(e.target.value)}
+              onChange={(e) => setMaxCapacity(e.target.value)}
             />
           </Form.Item>
-          <div>Description</div>
-          <Form.Item
-            name="description"
-            rules={[
-              {
-                required: true,
-                message: "This field is required!",
-              },
-            ]}
-          >
-            <Input
-              placeholder="Description"
-              name="description"
-              style={{
-                height: 50,
-
-                borderRadius: 6,
-              }}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </Form.Item>
-          <Form.Item label="Category">
+          <Form.Item label="Room Type">
             <FormControl sx={{ width: 300 }}>
-              <Select placeholder="Select Category..." onChange={loadCate}>
-                {cateList.map((cate) => (
-                  <Option key={cate.id} value={cate.id}>
-                    {cate.nameCatService}
+              <Select placeholder="Select Room Type..." onChange={loadRoomType}>
+                {roomTypeList?.map((e) => (
+                  <Option key={e.id} value={e.id}>
+                    {e.name}
                   </Option>
                 ))}
               </Select>
@@ -381,7 +411,7 @@ function ServiceTable() {
                 boxShadow:
                   "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
               }}
-              onClick={addService}
+              onClick={addRoom}
             >
               Save
             </Button>
@@ -400,7 +430,7 @@ function ServiceTable() {
           }}
           footer={false}
         >
-          {selectedService ? (
+          {selectedRoom ? (
             <Form
               name="basic"
               form={formUpdate}
@@ -411,11 +441,36 @@ function ServiceTable() {
                 span: 40,
               }}
               autoComplete="off"
-              onFinish={editService}
+              onFinish={editRoom}
             >
-              <div>Name Service</div>
+              <Form.Item label="Building">
+                <FormControl sx={{ width: 300 }}>
+                  <Select
+                    placeholder="Select Building..."
+                    onChange={getFloorByBuilding}
+                  >
+                    {buildingList?.map((e) => (
+                      <Option key={e.id} value={e.id}>
+                        {e.buildingName}
+                      </Option>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Form.Item>
+              <Form.Item label="Floor">
+                <FormControl sx={{ width: 300 }}>
+                  <Select placeholder="Select Floor..." onChange={loadFloor}>
+                    {floorList?.map((e) => (
+                      <Option key={e.id} value={e.id}>
+                        {e.floorNo}
+                      </Option>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Form.Item>
+              <div>Room No </div>
               <Form.Item
-                name="nameService"
+                name="roomNo"
                 rules={[
                   {
                     required: true,
@@ -424,19 +479,19 @@ function ServiceTable() {
                 ]}
               >
                 <Input
-                  placeholder="Name Service"
-                  name="nameService"
+                  placeholder="Room No"
+                  name="roomNo"
                   style={{
                     height: 50,
 
                     borderRadius: 6,
                   }}
-                  onChange={(e) => setServiceName(e.target.value)}
+                  onChange={(e) => setRoomNo(e.target.value)}
                 />
               </Form.Item>
-              <div>Price</div>
+              <div>Max Capacity</div>
               <Form.Item
-                name="price"
+                name="maxCapacity"
                 rules={[
                   {
                     required: true,
@@ -446,43 +501,25 @@ function ServiceTable() {
               >
                 <Input
                   type="number"
-                  placeholder="Price"
-                  name="price"
+                  placeholder="Max Capacity"
+                  name="maxCapacity"
                   style={{
                     height: 50,
                     width: "100%",
                     borderRadius: 6,
                   }}
-                  onChange={(e) => setPrice(e.target.value)}
+                  onChange={(e) => setMaxCapacity(e.target.value)}
                 />
               </Form.Item>
-              <div>Description</div>
-              <Form.Item
-                name="description"
-                rules={[
-                  {
-                    required: true,
-                    message: "This field is required!",
-                  },
-                ]}
-              >
-                <Input
-                  placeholder="Description"
-                  name="description"
-                  style={{
-                    height: 50,
-
-                    borderRadius: 6,
-                  }}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </Form.Item>
-              <Form.Item label="Category" name='serviceCategoryId'>
+              <Form.Item label="Room Type">
                 <FormControl sx={{ width: 300 }}>
-                  <Select placeholder="Select Category..." onChange={loadCate} disabled>
-                    {cateList.map((cate) => (
-                      <Option key={cate.id} value={cate.id}>
-                        {cate.nameCatService}
+                  <Select
+                    placeholder="Select Room Type..."
+                    onChange={loadRoomType}
+                  >
+                    {roomTypeList?.map((e) => (
+                      <Option key={e.id} value={e.id}>
+                        {e.name}
                       </Option>
                     ))}
                   </Select>
@@ -552,10 +589,10 @@ function ServiceTable() {
               position: "relative",
             }}
           >
-            <Breadcrumb.Item style={{ fontSize: 22 }}>
-              Service Management{" "}
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>Service</Breadcrumb.Item>
+            <Breadcrumb.Item style={{ fontSize: 22 }}>Hotel </Breadcrumb.Item>
+            <Breadcrumb.Item>Building</Breadcrumb.Item>
+            <Breadcrumb.Item>Floor</Breadcrumb.Item>
+            <Breadcrumb.Item>Room</Breadcrumb.Item>
           </Breadcrumb>
 
           <div
@@ -579,7 +616,7 @@ function ServiceTable() {
                     color: "#32325d",
                   }}
                 >
-                  Service Management
+                  Room Management
                 </div>
 
                 <Button
@@ -597,26 +634,38 @@ function ServiceTable() {
                   onClick={showModal}
                 >
                   <PlusSquareOutlined />
-                  New Service
+                  New Room
                 </Button>
                 <hr color="#F2F2F2" />
                 <br />
-              
 
                 <FormControl sx={{ m: 1, width: 300 }}>
                   <Select
-                    placeholder="Select Category..."
-                    onChange={getListServiceByCate}
+                    placeholder="Select Building..."
+                    onChange={getFloorByBuilding}
                   >
-                    {cateList.map((cate) => (
-                      <Option key={cate.id} value={cate.id}>
-                        {cate.nameCatService}
+                    {buildingList?.map((e) => (
+                      <Option key={e.id} value={e.id}>
+                        {e.buildingName}
                       </Option>
                     ))}
                   </Select>
                 </FormControl>
 
-                <Table columns={column} dataSource={serviceList} />
+                <FormControl sx={{ m: 1, width: 300 }}>
+                  <Select
+                    placeholder="Select Floor..."
+                    onChange={getRoomByFloor}
+                  >
+                    {floorList?.map((e) => (
+                      <Option key={e.id} value={e.id}>
+                        {e.floorNo}
+                      </Option>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <Table columns={column} dataSource={roomList} />
               </div>
             </div>
           </div>
@@ -625,4 +674,4 @@ function ServiceTable() {
     </div>
   );
 }
-export default ServiceTable;
+export default Room;

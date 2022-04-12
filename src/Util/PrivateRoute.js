@@ -5,10 +5,9 @@ import { isChooseHotel, isLogin } from "./Auth";
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
   return (
-    
     <Route
       {...rest}
-      
+
       render={(props) =>{
         if(isLogin() === true ){
           return <Component {...props}/>

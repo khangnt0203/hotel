@@ -8,7 +8,7 @@ import Headnav from "../Header";
 import "../HomePage/style.css";
 
 import { EditOutlined, SettingOutlined, CheckOutlined } from "@ant-design/icons";
-import { setHotel } from "../../Util/Auth";
+import { getUserJWT, setHotel } from "../../Util/Auth";
 
 const { Meta } = Card;
 const { Content } = Layout;
@@ -27,9 +27,11 @@ export default function Dashboard() {
   useEffect(() => {
     getHotel();
   }, []);
-  
+
+  var user = JSON.parse(getUserJWT());
+
   function getHotel() {
-    getAuth(`/hotels`).then((respone) => {
+    getAuth(`/hotels?user-id=${user.id}`).then((respone) => {
       let map = new Map();
       if (respone.status === 200) {
         respone.data.data.data.map((e) => {
@@ -40,10 +42,9 @@ export default function Dashboard() {
     });
   }
 
-  const setting = () => {
-    setHotel(selectedHotel.id);
+  const setting = (e) => {
+    setHotel(e.id);
     history.push('/manager')
-    
   };
 
 
@@ -52,8 +53,9 @@ export default function Dashboard() {
     marginLeft: "6%",
     marginTop: "2%",
     textAlign: "center",
+    borderRadius:5
   };
-
+ 
   return (
     <div>
       <Layout
@@ -78,17 +80,18 @@ export default function Dashboard() {
                     marginTop: -200,
                     borderRadius: 6,
                     marginLeft: 50,
+                    borderRadius:5
                   }}
                 >
-                  <Card title="Choose Hotel">
+                  <Card title="Choose Hotel" style={{ borderRadius:5}}>
                     {hotelList.map((e) => (
-                      <Card.Grid style={gridStyle} key={e.id}>
+                      <Card.Grid style={gridStyle} key={e.id} >
                         <Card
-                          style={{ width: 300 }}
+                          style={{ width: 300, borderRadius:10 }}
                           cover={
                             <img alt="Image is not available" src={e.image} />
                           }
-                          key={e.id}
+                          key={e}
                           actions={[
                             <SettingOutlined
                               key="setting"
@@ -98,13 +101,9 @@ export default function Dashboard() {
                               }}
                             />,
                             <EditOutlined  key="edit" onClick={()=>{
-                              setSelectedHotel(e.id);
-                               setting();
+                              setSelectedHotel(e);
+                              setting(e);
                             }} />,
-                            <CheckOutlined
-                            onClick={()=>setSelectedHotel(e)}
-                            />,
-                           
                           ]}
                         >
                           <Meta

@@ -8,17 +8,12 @@ import { getHotel, setHotel } from "../../Util/Auth";
 const { Sider } = Layout;
 const { SubMenu } = Menu;
 
-let interval;
+
 
 function SideBar(props) {
-  const [time, setTime] = useState(new Date().toLocaleTimeString());
+
   const [hotel, setHotel] = useState();
-  useEffect(() => {
-    interval = setInterval(
-      () => setTime(new Date().toLocaleTimeString()),
-      1000
-    );
-  });
+
 
   useEffect(() => {
     getHotelDetail();
@@ -46,19 +41,21 @@ function SideBar(props) {
       }}
       width="250"
     >
-      <Menu mode="inline" defaultOpenKeys="sub1,sub2,sub3">
+      <Menu mode="inline" defaultOpenKeys="sub1,sub2,sub3,sub4">
         <h1
           style={{
             padding: 20,
+            paddingBottom:50,
+            paddingTop:40,
             fontStyle: "italic",
-            fontSize: 15,
+            fontSize: 30,
             color: "#33CCFF",
           }}
         >
           {hotel ? hotel.name : null}
         </h1>
         <h2 style={{ marginTop: 20, marginLeft: 40, fontSize: 15 }}>
-          Time: {time}
+
         </h2>
         <Menu.Item onClick={() => props.onChoice("DASHBOARD")}>
           <svg
@@ -102,31 +99,14 @@ function SideBar(props) {
           <Menu.Item onClick={() => props.onChoice("BOOKING")}>
             Booking
           </Menu.Item>
-          <Menu.Item onClick={() => props.onChoice("SERVICE DETAIL")}>
-            Guest
-          </Menu.Item>
+         
         </SubMenu>
-        <Menu.Item>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ marginRight: 7, color: "#87CEFA" }}
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-clipboard2-fill"
-            viewBox="0 0 16 16"
-          >
-            <path d="M9.5 0a.5.5 0 0 1 .5.5.5.5 0 0 0 .5.5.5.5 0 0 1 .5.5V2a.5.5 0 0 1-.5.5h-5A.5.5 0 0 1 5 2v-.5a.5.5 0 0 1 .5-.5.5.5 0 0 0 .5-.5.5.5 0 0 1 .5-.5h3Z" />
-            <path d="M3.5 1h.585A1.498 1.498 0 0 0 4 1.5V2a1.5 1.5 0 0 0 1.5 1.5h5A1.5 1.5 0 0 0 12 2v-.5c0-.175-.03-.344-.085-.5h.585A1.5 1.5 0 0 1 14 2.5v12a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 14.5v-12A1.5 1.5 0 0 1 3.5 1Z" />
-          </svg>
-          Report
-        </Menu.Item>
+      
 
         <SubMenu
           key="sub2"
           icon={<SettingOutlined style={{ color: "#7B68EE" }} />}
-          title="Service Management"
-        >
+          title="Service Management">
           <Menu.Item onClick={() => props.onChoice("SERVICE DETAIL")}>
             Service
           </Menu.Item>
@@ -140,24 +120,16 @@ function SideBar(props) {
           icon={<BankOutlined style={{ color: "#BA55D3" }} />}
           title="Hotel"
         >
-          <Menu.Item>Room</Menu.Item>
-          <Menu.Item onClick={() => props.onChoice("BUILDING DETAIL")}>Building</Menu.Item>
+          <Menu.Item onClick={() => props.onChoice("ROOM TYPE")}>
+            Room Type
+          </Menu.Item>
+          <SubMenu title="Building" key="sub4" >
+            <Menu.Item onClick={() => props.onChoice("ROOM")}>Room</Menu.Item>
+            <Menu.Item onClick={() => props.onChoice("FLOOR")}>Floor</Menu.Item>
+            <Menu.Item onClick={() => props.onChoice("BUILDING DETAIL")}>Block</Menu.Item>
+          </SubMenu>
         </SubMenu>
-        <Menu.Item>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ marginRight: 7, color: "red" }}
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-cash-stack"
-            viewBox="0 0 16 16"
-          >
-            <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zm7 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
-            <path d="M0 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V5zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2H3z" />
-          </svg>
-          Revenue
-        </Menu.Item>
+      
       </Menu>
     </Sider>
   );

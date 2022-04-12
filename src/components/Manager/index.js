@@ -9,6 +9,11 @@ import ServiceCategoryTable from "../Service/ServiceCategory";
 import ServiceTable from "../Service/ServiceDetail";
 import Sidebar from "../Sider";
 import BuildingTable from "../Building/BuildingTable";
+import RoomType from "../RoomType"
+import ListBooking from "../Booking/booking-list";
+import OrderList from "../Booking/order-list";
+import Floor from "../Floor";
+import Room from "../Room";
 
 export default function Manager() {
   const [choice, setChoice] = useState("");
@@ -23,9 +28,17 @@ export default function Manager() {
       case "DASHBOARD":
         return <Dashboard />;
       case "BOOKING":
-        return <Booking />;
-        case "BUILDING DETAIL":
-          return <BuildingTable />;
+        return <ListBooking />;
+      case "ORDERLIST":
+        return <OrderList />;
+      case "BUILDING DETAIL":
+        return <BuildingTable />;
+      case "ROOM TYPE":
+        return <RoomType />;
+        case "ROOM":
+        return <Room/>;
+      case "FLOOR":
+        return <Floor />;
       default:
         return <Dashboard />;
     }

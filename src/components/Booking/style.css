@@ -22,13 +22,8 @@ thead{
 .code-box-demo .ant-alert {
   margin-bottom: 16px;
 }
-
-
-  .site-card-wrapper {
-    padding: 30px;
-    background: #ececec;
-  }
-
-.statistic {
-  color: white;
+.formContainer {
+  max-width: 300px;
+  padding: 20px;
+  background-color: #fff;
 }

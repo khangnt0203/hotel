@@ -56,7 +56,7 @@ let chosen = getHotel();
     console.log(selectedCategory);
     setIsModalUpdateVisible(true);
   };
-  
+
   useEffect(() => {
     getListCate(currentPage);
   }, []);
@@ -226,7 +226,7 @@ let chosen = getHotel();
             span: 8,
           }}
           wrapperCol={{
-            span: 40,
+            span: 60,
           }}
           autoComplete="off"
         >
@@ -246,8 +246,7 @@ let chosen = getHotel();
               onChange={(e) => setNameCategory(e.target.value)}
               style={{
                 height: 50,
-                boxShadow:
-                  "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
+               
                 borderRadius: 6,
               }}
             />
@@ -268,8 +267,7 @@ let chosen = getHotel();
               name="description"
               onChange={(e) => setDescription(e.target.value)}
               style={{
-                boxShadow:
-                  "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
+               
                 borderRadius: 6,
               }}
             />

@@ -5,10 +5,10 @@ import {isLogin } from "./Auth";
 
 const PublicRoute = ({ component: Component, ...rest }) => {
   return (
-    
+
     <Route
       {...rest}
-      
+
       render={(props) =>{
         if(isLogin() === false){
           return <Component {...props}/>

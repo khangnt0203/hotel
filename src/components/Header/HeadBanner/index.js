@@ -8,7 +8,7 @@ import Container from "@mui/material/Container";
 import { UserOutlined } from "@ant-design/icons";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
-import { getUser, removeToken } from "../../../Util/Auth";
+import { getUserJWT, removeToken } from "../../../Util/Auth";
 
 import { useHistory } from "react-router-dom";
 
@@ -28,7 +28,8 @@ function HeadBanner(props) {
     removeToken();
     history.push("/");
   };
-  const user = getUser();
+  // const user = getUser();
+  var userJWT = JSON.parse(getUserJWT());
 
   return (
     <Container maxWidth="xl" style={{ marginLeft: "90%", zIndex: "1" }}>
@@ -40,7 +41,7 @@ function HeadBanner(props) {
               style={{ top: -120, right: 150 }}
             >
               <UserOutlined />
-              <div style={{ marginRight: 10, fontSize: 20 }}>{user}</div>
+              <div style={{ marginRight: 10, fontSize: 20 }}>{userJWT.name}</div>
             </IconButton>
           </Tooltip>
           <Menu

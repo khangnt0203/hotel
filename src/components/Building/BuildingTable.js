@@ -17,7 +17,7 @@ import {
   DeleteFilled,
   EditFilled,
 } from "@ant-design/icons";
-import { delAuth, getAuth, postAuth } from "../../Util/httpHelper";
+import { delAuth, getAuth, postAuth, putAuth } from "../../Util/httpHelper";
 import { getHotel } from "../../Util/Auth";
 const { Content } = Layout;
 const { Search } = Input;
@@ -27,13 +27,13 @@ function BuildingTable() {
   const [keyword, setKeyword] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalUpdateVisible, setIsModalUpdateVisible] = useState(false);
-  const [idBuilding, setIdBuilding] = useState("");
-  const [nameBuilding, setNameBuilding] = useState("");
-  const [floorNo, setFloorNo] = useState("");
+  const [buildingName, setBuildingName] = useState("");
   const [totalRoom, setTotalRoom] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState();
   const [selectedBuilding, setSelectedBuilding] = useState();
+  const [buildingId, setBuildingId]=useState();
+  const [formUpdate]=Form.useForm();
+  const [formAdd] = Form.useForm();
   const showModal = () => {
     setIsModalVisible(true);
   };
@@ -52,7 +52,7 @@ function BuildingTable() {
   }
 
   const showModalUpdate = () => {
-    console.log(selectedCategory);
+
     setIsModalUpdateVisible(true);
   };
 
@@ -61,19 +61,20 @@ function BuildingTable() {
   }, []);
 
   // update form update when selectedCAtegory change
-let chosen = getHotel();
+  let chosen = getHotel();
+
   async function getListBuilding(page) {
-    console.log("Current: ", page);
-    getAuth(`/buildings?hotel-id=${chosen}&page-index=${page}`).then((response) => {
-      let map = new Map();
-      if (response.status === 200) {
-        response.data.data.map((e) => {
-          map.set(e.id, e);
-        });
-        console.log('1:',map);
-        setBuildingList([...map.values()]);
+    getAuth(`/buildings?hotel-id=${chosen}&page-index=${page}`).then(
+      (response) => {
+        let map = new Map();
+        if (response.status === 200) {
+          response.data.data.map((e) => {
+            map.set(e.id, e);
+          });
+          setBuildingList([...map.values()]);
+        }
       }
-    });
+    );
   }
   const deleteBuilding = (id) => {
     delAuth(`/buildings/${id}`).then((response) => {
@@ -83,23 +84,48 @@ let chosen = getHotel();
       }
     });
   };
-  // const addBuilding = () => {
-  //   postAuth(`/buildings`, {
-  //     nameCatService: nameCategory,
-  //     description: description,
-  //     hotelId: 2,
-  //   }).then((response) => {
-  //     if (response.status === 201) {
-  //       message.success("Input Successfully");
-  //       setIsModalVisible(false);
-  //       getListCate(currentPage);
-  //       formAdd.resetFields();
-  //     }
-  //   });
-  // };
+  const addBuilding = () => {
+    postAuth(`/buildings`, {
+      buildingName: buildingName,
+      totalRoom: totalRoom,
+      hotelId: chosen,
+    }).then((response) => {
+      if (response.status === 200) {
+        message.success("Input Successfully");
+        setIsModalVisible(false);
+        getListBuilding(currentPage);
+        formAdd.resetFields();
+      }
+    });
+  };
   useEffect(() => {
     getBuilding();
   }, []);
+
+  useEffect(() => {
+    if (selectedBuilding) {
+      formUpdate.setFieldsValue({
+      buildingName: selectedBuilding.buildingName,
+      totalRoom: selectedBuilding.totalRoom
+      });
+    }
+  }, [selectedBuilding]);
+
+  const editBuilding = (values) => {
+    putAuth(`/buildings`, {
+      id: buildingId,
+      buildingName: values.buildingName,
+      totalRoom: values.totalRoom,
+      hotelId: chosen,
+      status: true
+    }).then((response) => {
+      if (response.status === 200) {
+        message.success("Update Successfully");
+        setIsModalUpdateVisible(false);
+        getListBuilding(currentPage);
+      }
+    });
+  };
   function getBuilding() {
     getAuth(`/buildings?hotel-id=${chosen}`).then((response) => {
       if (response.status === 200) {
@@ -134,12 +160,6 @@ let chosen = getHotel();
       title: "Building name",
       key: "id",
       dataIndex: "buildingName",
-     
-    },
-    {
-      title: "Floor No",
-      key: "id",
-      dataIndex: "floorNo",
     },
     {
       title: "Total Room",
@@ -153,9 +173,10 @@ let chosen = getHotel();
         return (
           <>
             <Button
-              onClick={() => {
-                setSelectedBuilding(e);
-                showDrawer();
+               onClick={() => {
+                setBuildingId(item.id);
+                setSelectedBuilding(item);
+                setIsModalUpdateVisible(true);
               }}
               type="primary"
               style={{
@@ -170,7 +191,7 @@ let chosen = getHotel();
               <EditFilled />
             </Button>
             <Popconfirm
-              title="Are you sure to delete this Category?"
+              title="Are you sure to delete this Building?"
               onConfirm={() => {
                 deleteBuilding(item.id);
               }}
@@ -208,14 +229,227 @@ let chosen = getHotel();
 
   return (
     <div>
-      <Drawer
-        title="Basic Drawer"
-        placement="right"
-        onClose={onClose}
-        visible={visible}
+      <Modal
+        title="Room Add Form"
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={false}
       >
-        {selectedBuilding ? <p>{selectedBuilding.buildingName}</p> : <a>Lỗi</a>}
-      </Drawer>
+        <Form
+          name="basic"
+          form={formAdd}
+          labelCol={{
+            span: 8,
+          }}
+          wrapperCol={{
+            span: 40,
+          }}
+          autoComplete="off"
+        >
+          <div>Name Building</div>
+          <Form.Item
+            name="buildingName"
+            rules={[
+              {
+                required: true,
+                message: "This field is required!",
+              },
+            ]}
+          >
+            <Input
+              placeholder="Building name"
+              name="buildingName"
+              style={{
+                height: 50,
+
+                borderRadius: 6,
+              }}
+              onChange={(e)=>setBuildingName(e.target.value)}
+            />
+          </Form.Item>
+          <div>Total Room</div>
+          <Form.Item
+            name="totalRoom"
+            rules={[
+              {
+                required: true,
+                message: "This field is required!",
+              },
+            ]}
+          >
+            <Input
+              type="number"
+              placeholder="Total Room"
+              name="totalRoom"
+              style={{
+                height: 50,
+                width: "100%",
+                borderRadius: 6,
+              }}
+              onChange={(e)=>setTotalRoom(e.target.value)}
+            />
+          </Form.Item>
+
+          <Form.Item
+            wrapperCol={{
+              offset: 6,
+              span: 16,
+            }}
+          ></Form.Item>
+          <Form.Item
+            style={{ marginLeft: 150 }}
+            wrapperCol={{
+              offset: 6,
+              span: 16,
+            }}
+          >
+            <Button
+              key="back"
+              onClick={handleCancel}
+              style={{
+                height: 35,
+                width: 100,
+                borderRadius: 6,
+              }}
+            >
+              Return
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              style={{
+                borderColor: "#0000AA",
+                marginLeft: 10,
+                height: 35,
+                width: 100,
+                borderRadius: 6,
+                backgroundColor: "#0000AA",
+                boxShadow:
+                  "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
+              }}
+              onClick={addBuilding}
+            >
+              Save
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+      <>
+        <Modal
+          title="Building Update Form"
+          visible={isModalUpdateVisible}
+          onOk={() => {
+            setIsModalUpdateVisible(false);
+          }}
+          onCancel={() => {
+            setIsModalUpdateVisible(false);
+          }}
+          footer={false}
+        >
+          {selectedBuilding ? (
+             <Form
+             name="basic"
+             form={formUpdate}
+             labelCol={{
+               span: 8,
+             }}
+             wrapperCol={{
+               span: 40,
+             }}
+             autoComplete="off"
+             onFinish={editBuilding}
+           >
+             <div>Name Building</div>
+             <Form.Item
+               name="buildingName"
+               rules={[
+                 {
+                   required: true,
+                   message: "This field is required!",
+                 },
+               ]}
+             >
+               <Input
+                 placeholder="Building name"
+                 name="buildingName"
+                 style={{
+                   height: 50,
+   
+                   borderRadius: 6,
+                 }}
+                 onChange={(e)=>setBuildingName(e.target.value)}
+               />
+             </Form.Item>
+             <div>Total Room</div>
+             <Form.Item
+               name="totalRoom"
+               rules={[
+                 {
+                   required: true,
+                   message: "This field is required!",
+                 },
+               ]}
+             >
+               <Input
+                 type="number"
+                 placeholder="Total Room"
+                 name="totalRoom"
+                 style={{
+                   height: 50,
+                   width: "100%",
+                   borderRadius: 6,
+                 }}
+                 onChange={(e)=>setTotalRoom(e.target.value)}
+               />
+             </Form.Item>
+   
+             <Form.Item
+               wrapperCol={{
+                 offset: 6,
+                 span: 16,
+               }}
+             ></Form.Item>
+             <Form.Item
+               style={{ marginLeft: 150 }}
+               wrapperCol={{
+                 offset: 6,
+                 span: 16,
+               }}
+             >
+               <Button
+                 key="back"
+                 onClick={handleCancel}
+                 style={{
+                   height: 35,
+                   width: 100,
+                   borderRadius: 6,
+                 }}
+               >
+                 Return
+               </Button>
+               <Button
+                 type="primary"
+                 htmlType="submit"
+                 style={{
+                   borderColor: "#0000AA",
+                   marginLeft: 10,
+                   height: 35,
+                   width: 100,
+                   borderRadius: 6,
+                   backgroundColor: "#0000AA",
+                   boxShadow:
+                     "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
+                 }}
+                 
+               >
+                 Save
+               </Button>
+             </Form.Item>
+           </Form>
+          ) : null}
+        </Modal>
+      </>
       <Layout className="site-layout">
         <Content
           style={{
@@ -276,9 +510,10 @@ let chosen = getHotel();
                     boxShadow:
                       "0 7px 14px rgb(50 50 93 / 10%), 0 3px 6px rgb(0 0 0 / 8%)",
                   }}
+                  onClick={showModal}
                 >
                   <PlusSquareOutlined />
-                  New Category
+                  New Building
                 </Button>
                 <hr color="#F2F2F2" />
                 <br />
